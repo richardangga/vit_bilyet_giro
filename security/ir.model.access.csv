@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vit_bilyet_giro,vit.vit_bilyet_giro,model_vit_bilyet_giro,,1,1,1,1
+access_giro_invoice,vit.giro_invoice,model_giro_invoice,,1,1,1,1
+access_invoice,account.invoice,model_invoice,,1,1,1,1
+access_
