@@ -9,10 +9,10 @@ STATES = [('draft', 'Draft'), ('open', 'Open'), ('close', 'Close'), ('reject', '
 class vit_bilyet_giro(models.Model):
     _name = "vit.vit_bilyet_giro"
 
-    name = fields.Char(string="Number", help="Nomor Giro", readonly=True, states={'draft':[('readonly', False)]})
+    name = fields.Char(string="Number", help="Nomor Giro", readonly=True, states={'draft':[('readonly', True)]})
     due_date = fields.Date(string="Due Date", readonly=True, states={'draft':[('readonly', False)]})
     receive_date = fields.Date(string="Receive Date", readonly=True, states={'draft':[('readonly', False)]})
-    clearing_date = fields.Datetime(string="Clearing Date", readonly=True, states={'draft':[('readonly', False)]})
+    clearing_date = fields.Datetime(string="Clearing Date", readonly=True, states={'draft':[('readonly', True)]})
     amount = fields.Float(string="Amount", readonly=True, states={'draft':[('readonly', False)]})
     partner_id = fields.Many2one(comodel_name="res.partner", string="Partner", readonly=True, states={'draft':[('readonly', False)]})
     journal_id = fields.Many2one(comodel_name="account.journal", string="Bank Journal", domain=[('type', '=', 'bank')], readonly=True, states={'draft':[('readonly', False)]})
@@ -32,6 +32,11 @@ class vit_bilyet_giro(models.Model):
                 results[giro.id] += "%s " % (gi.invoice_id.number or "")
         return results
     
+    @api.model
+    def create(self, vals):
+        vals['name'] = self.env['ir.sequence'].next_by_code('vit.vit_bilyet_giro')
+        return super(vit_bilyet_giro, self).create(vals)
+    
     @api.multi
     def _cek_total(self):
         inv_total = 0.0
@@ -41,7 +46,7 @@ class vit_bilyet_giro(models.Model):
             if giro.amount == inv_total:
                 return True
         return False
-    _constraints = [(_cek_total, _('Total amount allocated for the invoices must be the same as total Giro amount'), ['amount', 'giro_invoice_ids'])]
+    # _constraints = [(_cek_total, _('Total amount allocated for the invoices must be the same as total Giro amount'), ['amount'])]
     _defaults = {
         'state': STATES[0][0],
         'receive_date': time.strftime("%Y-%m-%d %H:%M:%S"),
