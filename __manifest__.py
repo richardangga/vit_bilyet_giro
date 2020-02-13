@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "vit_bilyet_giro",
+    'name': "Bilyet & Giro",
 
     'summary': """
         Giro and Bilyet""",
@@ -14,7 +14,7 @@
         * created menu:
             * Accounting / Giro / Giro
         * created object
-            * vit.giro
+            * vit.vit_bilyet_giro
         * created views
             * giro
             * invoice
@@ -36,22 +36,24 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
-    'version': '0.1',
+    'version': '0.2',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','account','account_voucher'],
+    'depends': ['base','account'],
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/groups.xml',
+        'security/ir.model.access.csv',
         'views/views.xml',
-        'sequence/sequence.xml',
-        'views/templates.xml',
+        # 'sequence/sequence.xml',
+        # 'views/templates.xml',
         'views/invoice.xml',
+        # 'data/config_giro.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
-        'demo/demo.xml',
+        # 'demo/demo.xml',
     ],
     'installable': True,
     'auto_install': False,
