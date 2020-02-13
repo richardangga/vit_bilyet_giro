@@ -10,6 +10,7 @@
           <field name="journal_id"/>
           <field name="type"/>
           <field name="receive_date"/>
+          <field name="submit_date"/>
           <field name="clearing_date"/>
           <field name="amount"/>
           <field name="partner_id"/>
@@ -42,6 +43,7 @@
               <group>
                 <field name="due_date"/>
                 <field name="receive_date"/>
+                <field name="submit_date"/>
                 <field name="clearing_date"/>
                 <field name="amount"/>
               </group>
@@ -61,6 +63,31 @@
         </form>
       </field>
     </record>
+    <record id="vit_config_giro_form" model="ir.ui.view">
+      <field name="name">vit_config_giro_form</field>
+      <field name="model">vit.vit_config_giro</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="Configuration">
+          <sheet>
+            <group>
+              <field name="name_parameter"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+    <record id="vit_config_giro_tree" model="ir.ui.view">
+      <field name="name">vit_config_giro_tree</field>
+      <field name="model">vit.vit_config_giro</field>
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <tree string="Vit Config Giro">
+          <!-- <field name> -->
+          <field name="name_parameter"/>
+        </tree>
+      </field>
+    </record>
     <record model="ir.actions.act_window" id="act_vit_bilyet_giro_list">
       <field name="name">Bilyet Giro</field>
       <field name="res_model">vit.vit_bilyet_giro</field>
@@ -71,8 +98,15 @@
       <field name="res_model">account.invoice</field>
       <field name="view_mode">tree,form</field>
     </record>
+    <record model="ir.actions.act_window" id="act_vit_bilyet_giro_config">
+      <field name="name">Config Parameter</field>
+      <field name="res_model">vit.vit_config_giro</field>
+      <field name="view_mode">tree,form</field>
+    </record>
     <menuitem id="menu_vit_bilyet_giro_top" name="Giro Invoice" sequence="10"/>
 		<menuitem id="menu_vit_bilyet_giro_trans" name="Transactions" sequence="10" parent="menu_vit_bilyet_giro_top"/>
+    <menuitem id="menu_vit_bilyet_giro_config" name="Configuration" sequence="20" parent="menu_vit_bilyet_giro_top"/>
+    <menuitem id="menu_vit_bilyet_giro_config_tree" name="Param" action="act_vit_bilyet_giro_config" sequence="20" parent="menu_vit_bilyet_giro_config"/>
     <menuitem id="menu_vit_bilyet_giro" name="Bilyet Giro" action="act_vit_bilyet_giro_list" sequence="20" parent="menu_vit_bilyet_giro_trans"/>
     <menuitem id="menu_vit_bilyet_giro_invoice" name="Invoice" action="act_vit_bilyet_giro_invoice_list" sequence="20" parent="menu_vit_bilyet_giro_trans"/>
     <!-- <record id="giro_filter" model="ir.ui.view">
