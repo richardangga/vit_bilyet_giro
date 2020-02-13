@@ -11,6 +11,7 @@ STATES = [('draft', 'Draft'), ('open', 'Open'),
 
 class vit_bilyet_giro(models.Model):
     _name = "vit.vit_bilyet_giro"
+    # _inherit = "vit.vit_config_giro"
 
     def _get_invoices(self):
         results = {}

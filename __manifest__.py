@@ -46,10 +46,7 @@
         'security/groups.xml',
         'security/ir.model.access.csv',
         'views/views.xml',
-        # 'sequence/sequence.xml',
-        # 'views/templates.xml',
         'views/invoice.xml',
-        # 'data/config_giro.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
