@@ -11,7 +11,7 @@ STATES = [('draft', 'Draft'), ('open', 'Open'),
 
 class vit_bilyet_giro(models.Model):
     _name = "vit.vit_bilyet_giro"
-    # _inherit = "vit.vit_config_giro"
+    # _inherit = "vit_config_giro"
 
     def _get_invoices(self):
         results = {}
@@ -47,7 +47,7 @@ class vit_bilyet_giro(models.Model):
                                'draft': [('readonly', False)]})
     state = fields.Selection(string="State", selection=STATES,
                              required=True, readonly=True, default=STATES[0][0])
-    param_id = fields.Many2one(comodel_name="vit.vit_config_giro", string="Submit Term", required=True, states={'draft':[('readonly', False)]})
+    param_id = fields.Many2one(comodel_name="vit_config_giro", string="Submit Term", required=True, states={'draft':[('readonly', False)]})
     _sql_constraints = [('name_uniq', 'unique(name)',
                          _('Nomor Giro tidak boleh sama'))]
                          
@@ -138,7 +138,7 @@ class vit_bilyet_giro(models.Model):
             self.submit_date = (start - timedelta(days=end.term))
 
 class vit_config_giro(models.Model):
-    _name = "vit.vit_config_giro"
+    _name = "vit_config_giro"
 
     name = fields.Char(string="Name", help="Nama Submit term",
                        required=True)
