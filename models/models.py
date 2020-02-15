@@ -4,6 +4,7 @@ import logging
 import odoo.addons.decimal_precision as dp
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError
+# from datetime import datetime, timedelta, date, time
 
 STATES = [('draft', 'Draft'), ('open', 'Open'),
           ('close', 'Close'), ('reject', 'Reject')]
@@ -11,7 +12,7 @@ STATES = [('draft', 'Draft'), ('open', 'Open'),
 
 class vit_bilyet_giro(models.Model):
     _name = "vit.vit_bilyet_giro"
-    # _inherit = "vit_config_giro"
+    # _inherit = "vit.vit_config_giro"
 
     def _get_invoices(self):
         results = {}
@@ -25,7 +26,7 @@ class vit_bilyet_giro(models.Model):
                        required=True, states={'draft': [('readonly', False)]})
     due_date = fields.Date(string="Due Date", required=True, readonly=True, states={
                                'draft': [('readonly', False)]})
-    receive_date = fields.Date(string="Receive Date", readonly=True, required=True,states={
+    receive_date = fields.Date(string="Receive Date", readonly=True, states={
                                    'draft': [('readonly', False)]})
     submit_date = fields.Date(string="Submit Date", readonly=True, states={
                                    'draft': [('readonly', False)]})
@@ -37,7 +38,7 @@ class vit_bilyet_giro(models.Model):
                                  'draft': [('readonly', False)]})
     journal_id = fields.Many2one(comodel_name="account.journal", string="Bank Journal", domain=[
                                  ('type', '=', 'bank')], readonly=True, states={'draft': [('readonly', False)]})
-    giro_invoice_ids = fields.One2many(comodel_name="vit_giro_invoice", inverse_name="giro_id", readonly=True, states={
+    giro_invoice_ids = fields.One2many(comodel_name="vit.giro_invoice", inverse_name="giro_id", readonly=True, states={
                                        'draft': [('readonly', False)]})
     invoice_names = fields.Char(
         string="Allocated Invoices", compute='_get_invoices')
@@ -47,7 +48,7 @@ class vit_bilyet_giro(models.Model):
                                'draft': [('readonly', False)]})
     state = fields.Selection(string="State", selection=STATES,
                              required=True, readonly=True, default=STATES[0][0])
-    param_id = fields.Many2one(comodel_name="vit_config_giro", string="Submit Term", required=True, states={'draft':[('readonly', False)]})
+    param_id = fields.Many2one(comodel_name="vit.vit_config_giro", string="Submit Term")
     _sql_constraints = [('name_uniq', 'unique(name)',
                          _('Nomor Giro tidak boleh sama'))]
                          
@@ -92,10 +93,12 @@ class vit_bilyet_giro(models.Model):
             payment = giro.env['account.payment']
             company_id = giro._context.get(
                 'company_id', giro.env.user.company_id.id)
+            #payment supplier
             if giro.type == 'payment':
                 pay_type = 'outbound'
                 partner_type = 'supplier'
                 payment_method = giro.journal_id.outbound_payment_method_ids.id
+            #receive customer
             else:
                 pay_type = 'inbound'
                 partner_type = 'customer'
@@ -112,6 +115,7 @@ class vit_bilyet_giro(models.Model):
                 'payment_method_id': payment_method,
 
             })
+            # import pdb; pdb.set_trace()
             payment.browse(payment_id.id).post()
             self.write({'state': STATES[2][0], 'clearing_date': time.strftime("%Y-%m-%d %H:%M:%S")})
 
@@ -138,15 +142,16 @@ class vit_bilyet_giro(models.Model):
             self.submit_date = (start - timedelta(days=end.term))
 
 class vit_config_giro(models.Model):
-    _name = "vit_config_giro"
+    _name = "vit.vit_config_giro"
 
     name = fields.Char(string="Name", help="Nama Submit term",
                        required=True)
+    # date = fields.Date(string="Term Date")
     term = fields.Integer(string="Term", help="parameter", required=True)
     category = fields.Char(string="Type", readonly=True, default='Days')
 
 class vit_giro_invoice(models.Model):
-    _name = "vit_giro_invoice"
+    _name = "vit.giro_invoice"
 
     giro_id = fields.Many2one(
         comodel_name="vit.vit_bilyet_giro", string="Giro")
@@ -165,4 +170,4 @@ class account_invoice(models.Model):
     _inherit = 'account.invoice'
 
     giro_invoice_ids = fields.One2many(
-        comodel_name="vit_giro_invoice", inverse_name="invoice_id", string="Giro")
+        comodel_name="vit.giro_invoice", inverse_name="invoice_id", string="Giro")

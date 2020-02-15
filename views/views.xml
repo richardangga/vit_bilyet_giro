@@ -70,7 +70,7 @@
     </record>
     <record id="vit_config_giro_form" model="ir.ui.view">
       <field name="name">vit_config_giro_form</field>
-      <field name="model">vit_config_giro</field>
+      <field name="model">vit.vit_config_giro</field>
       <field name="type">form</field>
       <field name="arch" type="xml">
         <form string="Configuration">
@@ -92,7 +92,7 @@
     </record>
     <record id="vit_config_giro_tree" model="ir.ui.view">
       <field name="name">vit_config_giro_tree</field>
-      <field name="model">vit_config_giro</field>
+      <field name="model">vit.vit_config_giro</field>
       <field name="type">tree</field>
       <field name="arch" type="xml">
         <tree string="Vit Config Giro">
@@ -115,7 +115,7 @@
     </record>
     <record model="ir.actions.act_window" id="act_vit_bilyet_giro_config">
       <field name="name">Submit Term</field>
-      <field name="res_model">vit_config_giro</field>
+      <field name="res_model">vit.vit_config_giro</field>
       <field name="view_mode">tree,form</field>
     </record>
     <menuitem id="menu_vit_bilyet_giro_top" name="Giro Invoice" sequence="10" groups="vit_bilyet_giro.group_giro"/>
