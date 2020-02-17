@@ -43,14 +43,14 @@
                 <field name="type"/>
                 <field name="invoice_type" invisible="1"/>
                 <field name="partner_id"/>
-                <field name="param_id"/>
+                <field name="amount"/>
               </group>
               <group>
                 <field name="due_date"/>
                 <field name="receive_date"/>
+                <field name="param_id"/>
                 <field name="submit_date"/>
                 <field name="clearing_date"/>
-                <field name="amount"/>
               </group>
             </group>
             <notebook colspan="4">
