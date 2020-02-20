@@ -78,6 +78,10 @@ class vit_bilyet_giro(models.Model):
 		due_date = str(start)
 		param = res.param_id
 		store = start - timedelta(days=(param.term))
+		if self.giro_invoice_ids.ids == []:
+			raise UserError(_('Invoice dan amount invoice harus terisi'))
+		if self.amount == 0.0:
+			raise UserError(_('Amount harus terisi'))
 		if receive_date >= due_date:
 			raise UserError(_('Due Date harus lebih atau sama dengan Receive Date!'))
 		if submit_date >= str(store):
@@ -92,6 +96,10 @@ class vit_bilyet_giro(models.Model):
 		submit_date = str(self.submit_date)
 		# start = datetime.strptime(due_date, '%Y-%m-%d').date()
 		store = start - timedelta(days=(self.param_id.term))
+		if self.giro_invoice_ids.ids == []:
+			raise UserError(_('Invoice dan amount invoice harus terisi'))
+		if self.amount == 0.0:
+			raise UserError(_('Amount harus terisi'))
 		if receive_date >= due_date:
 			raise UserError(_('Due Date harus lebih atau sama dengan Receive Date!'))
 		if submit_date >= str(store):
