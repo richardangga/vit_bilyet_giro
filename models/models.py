@@ -39,7 +39,7 @@ class vit_bilyet_giro(models.Model):
 								 'draft': [('readonly', False)]})
 	journal_id = fields.Many2one(comodel_name="account.journal", string="Bank Journal", domain=[
 								 ('type', '=', 'bank')], readonly=True, states={'draft': [('readonly', False)]})
-	giro_invoice_ids = fields.One2many(comodel_name="vit.giro_invoice", inverse_name="giro_id", readonly=True, states={
+	giro_invoice_ids = fields.One2many(comodel_name="vit.giro_invoice",inverse_name="giro_id", readonly=True, states={
 									   'draft': [('readonly', False)]})
 	invoice_names = fields.Char(compute="_invoice_names", string="Allocated Invoices")
 	type = fields.Selection([('payment', 'Payment'), ('receipt', 'Receipt')], default='payment',
@@ -99,7 +99,23 @@ class vit_bilyet_giro(models.Model):
 		return result
 
 	@api.multi
-	def action_confirm(self):
+	def action_confirm(self):	
+		# inv_total = 0.0
+		# for giro in self:
+		# 	invoice_names = []
+		# 	for gi in giro.giro_invoice_ids:
+		# 		inv_total += gi.amount
+		# 		invoice_names.append( "%s " % (gi.invoice_id.number or "") )
+		# 		giro.invoice_names = ", ".join(invoice_names)
+		# 	if giro.amount != inv_total:
+		# 		raise UserError(_('Invoice dan amount invoice harus terisi'))
+		# 	if giro.amount == 0.0:
+		# 		raise UserError(_('Amount harus terisi'))
+		if self.giro_invoice_ids.ids == []:
+			raise UserError(_('Invoice dan amount invoice harus terisi'))
+		if self.amount == 0.0:
+			raise UserError(_('Amount harus terisi'))
+		
 		# due_date = str(self.due_date)
 		# receive_date = str(self.receive_date)
 		# start = datetime.strptime(due_date, '%Y-%m-%d %H:%M:%S')
@@ -110,7 +126,7 @@ class vit_bilyet_giro(models.Model):
 		# print('=========================')
 		# if (str(par)[0:3]) <= (str(end.name_parameter)) :
 		# if due_date <= receive_date :
-		#     raise UserError(_('Tanggal Due Date harus lebih besar dari tanggal Receive Date'))
+		#     
 
 		# self.write({'state': STATES[1][0], 'submit_date': (start - timedelta(days=end.name_parameter))})
 		self.write({'state': STATES[1][0]})
