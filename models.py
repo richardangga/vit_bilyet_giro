@@ -13,16 +13,7 @@ STATES = [('draft', 'Draft'), ('open', 'Open'),
 class vit_bilyet_giro(models.Model):
 	_name = "vit.vit_bilyet_giro"
 
-	def _invoice_names(self):
-		# results = {}
-		for giro in self:
-			invoice_names = []
-			for gi in giro.giro_invoice_ids:
-				invoice_names.append( "%s " % (gi.invoice_id.number or "") )
-				results = ", ".join(invoice_names)
-		# import pdb; pdb.set_trace()
-			giro.invoice_names = results
-
+	
 	name = fields.Char(string="Number", help="Nomor Giro",
 					   required=True, states={'draft': [('readonly', False)]})
 	due_date = fields.Date(string="Due Date", required=True, readonly=True, states={
@@ -78,9 +69,9 @@ class vit_bilyet_giro(models.Model):
 		due_date = str(start)
 		param = res.param_id
 		store = start - timedelta(days=(param.term))
-		if self.giro_invoice_ids.ids == []:
+		if res.giro_invoice_ids.ids == []:
 			raise UserError(_('Invoice dan amount invoice harus terisi'))
-		if self.amount == 0.0:
+		if res.amount == 0.0:
 			raise UserError(_('Amount harus terisi'))
 		if receive_date >= due_date:
 			raise UserError(_('Due Date harus lebih atau sama dengan Receive Date!'))
@@ -105,6 +96,16 @@ class vit_bilyet_giro(models.Model):
 		if submit_date >= str(store):
 			raise UserError(_('Submit Date harus kurang atau sama dengan %s hari sebelum Due Date!')  % (self.param_id.term))
 		return result
+
+	def _invoice_names(self):
+		# results = {}
+		for giro in self:
+			invoice_names = []
+			for gi in giro.giro_invoice_ids:
+				invoice_names.append( "%s " % (gi.invoice_id.number or "") )
+				results = ", ".join(invoice_names)
+		# import pdb; pdb.set_trace()
+			giro.invoice_names = results
 
 	@api.multi
 	def action_confirm(self):	
