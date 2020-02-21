@@ -13,7 +13,6 @@ STATES = [('draft', 'Draft'), ('open', 'Open'),
 class vit_bilyet_giro(models.Model):
 	_name = "vit.vit_bilyet_giro"
 
-	
 	def _invoice_names(self):
 		# results = {}
 		for giro in self:
@@ -23,7 +22,6 @@ class vit_bilyet_giro(models.Model):
 				results = ", ".join(invoice_names)
 		# import pdb; pdb.set_trace()
 				giro.invoice_names = results
-
 
 	name = fields.Char(string="Number", help="Nomor Giro",
 					   required=True, states={'draft': [('readonly', False)]})
@@ -37,11 +35,12 @@ class vit_bilyet_giro(models.Model):
 									'draft': [('readonly', True)]})
 	amount = fields.Float(string="Amount", readonly=True, states={
 						  'draft': [('readonly', False)]})
+	# amount = fields.Float(string="Amount", compute="_cek_total",)
 	partner_id = fields.Many2one(comodel_name="res.partner", string="Partner", readonly=True, states={
 								 'draft': [('readonly', False)]})
 	journal_id = fields.Many2one(comodel_name="account.journal", string="Bank Journal", domain=[
 								 ('type', '=', 'bank')], readonly=True, states={'draft': [('readonly', False)]})
-	giro_invoice_ids = fields.One2many(comodel_name="vit.giro_invoice",inverse_name="giro_id", readonly=True, states={
+	giro_invoice_ids = fields.One2many(comodel_name="vit.giro_invoice", inverse_name="giro_id", readonly=True, states={
 									   'draft': [('readonly', False)]})
 	invoice_names = fields.Char(compute="_invoice_names", string="Allocated Invoices")
 	type = fields.Selection([('payment', 'Payment'), ('receipt', 'Receipt')], default='payment',
@@ -52,7 +51,7 @@ class vit_bilyet_giro(models.Model):
 							 required=True, readonly=True, default=STATES[0][0])
 	param_id = fields.Many2one(comodel_name="vit.vit_config_giro", string="Submit Term")
 	_sql_constraints = [('name_uniq', 'unique(name)',
-						 _('Nomor Giro tidak boleh sama'))]
+						 _('Nomor Giro tidak boleh sama!'))]
 						 
 	@api.multi
 	def _cek_total(self):
@@ -60,13 +59,20 @@ class vit_bilyet_giro(models.Model):
 		for giro in self:
 			for gi in giro.giro_invoice_ids:
 				inv_total += gi.amount
+			# import pdb; pdb.set_trace()
 			if giro.amount == inv_total:
 				return True
 		return False
 	
 	_constraints = [(_cek_total, _(
-		'Total amount allocated for the invoices must be the same as total Giro amount'), ['amount'])]
-		
+		'Total amount allocated untuk invoices harus sama dengan total Giro amount'), ['amount'])]
+	# def _cek_total(self):
+	# 	inv_total = 0.0
+	# 	for giro in self:
+	# 		for gi in giro.giro_invoice_ids:
+	# 			inv_total += gi.amount
+	# 			giro.amount = inv_total
+
 	@api.multi
 	def action_cancel(self):
 		self.write({'state': STATES[0][0]})
@@ -79,15 +85,13 @@ class vit_bilyet_giro(models.Model):
 		submit_date = str(res.submit_date)
 		due_date = str(start)
 		param = res.param_id
-		store = start - timedelta(days=(param.term))
-		if res.giro_invoice_ids.ids == []:
-			raise UserError(_('Invoice dan amount invoice harus terisi'))
-		if res.amount == 0.0:
-			raise UserError(_('Amount harus terisi'))
+		store = start - timedelta(days=(param.term)+2)
 		if receive_date >= due_date:
-			raise UserError(_('Due Date harus lebih atau sama dengan Receive Date!'))
-		if submit_date >= str(store):
-			raise UserError(_('Submit Date harus kurang atau sama dengan %s hari sebelum Due Date!')  % (param.term))
+			raise UserError(_('Receive Date tidak boleh lebih dari Due Date!'))
+		if submit_date <= str(store):
+			raise UserError(_('Submit Date tidak boleh kurang dari %s hari sebelum Due Date!')  % (param.term))
+		if submit_date >= due_date:
+			raise UserError(_('Submit Date tidak boleh lebih dari Due Date!'))
 		return res
 
 	def write(self, values):        
@@ -97,34 +101,23 @@ class vit_bilyet_giro(models.Model):
 		receive_date = str(self.receive_date)
 		submit_date = str(self.submit_date)
 		# start = datetime.strptime(due_date, '%Y-%m-%d').date()
-		store = start - timedelta(days=(self.param_id.term))
-		if self.giro_invoice_ids.ids == []:
-			raise UserError(_('Invoice dan amount invoice harus terisi'))
-		if self.amount == 0.0:
-			raise UserError(_('Amount harus terisi'))
+		store = start - timedelta(days=(self.param_id.term)+2)
 		if receive_date >= due_date:
-			raise UserError(_('Due Date harus lebih atau sama dengan Receive Date!'))
-		if submit_date >= str(store):
-			raise UserError(_('Submit Date harus kurang atau sama dengan %s hari sebelum Due Date!')  % (self.param_id.term))
+			raise UserError(_('Receive Date tidak boleh lebih dari Due Date!'))
+		if submit_date <= str(store):
+			raise UserError(_('Submit Date tidak boleh kurang dari %s hari sebelum Due Date!')  % (self.param_id.term))
+		if submit_date >= due_date:
+			raise UserError(_('Submit Date tidak boleh lebih dari Due Date!'))
 		return result
 
 	@api.multi
-	def action_confirm(self):	
-		# inv_total = 0.0
-		# for giro in self:
-		# 	invoice_names = []
-		# 	for gi in giro.giro_invoice_ids:
-		# 		inv_total += gi.amount
-		# 		invoice_names.append( "%s " % (gi.invoice_id.number or "") )
-		# 		giro.invoice_names = ", ".join(invoice_names)
-		# 	if giro.amount != inv_total:
-		# 		raise UserError(_('Invoice dan amount invoice harus terisi'))
-		# 	if giro.amount == 0.0:
-		# 		raise UserError(_('Amount harus terisi'))
+	def action_confirm(self):
+		# import pdb; pdb.set_trace()
 		if self.giro_invoice_ids.ids == []:
-			raise UserError(_('Invoice dan amount invoice harus terisi'))
-		if self.amount == 0.0:
-			raise UserError(_('Amount harus terisi'))
+			raise UserError(_('Invoice harus di isi!'))
+
+		if self.amount == 0:
+			raise UserError(_('Amount Allocated harus di isi!'))
 		
 		# due_date = str(self.due_date)
 		# receive_date = str(self.receive_date)
@@ -136,7 +129,7 @@ class vit_bilyet_giro(models.Model):
 		# print('=========================')
 		# if (str(par)[0:3]) <= (str(end.name_parameter)) :
 		# if due_date <= receive_date :
-		#     
+		#     raise UserError(_('Tanggal Due Date harus lebih besar dari tanggal Receive Date'))
 
 		# self.write({'state': STATES[1][0], 'submit_date': (start - timedelta(days=end.name_parameter))})
 		self.write({'state': STATES[1][0]})
@@ -218,6 +211,21 @@ class vit_giro_invoice(models.Model):
 	@api.onchange('invoice_id')
 	def on_change_invoice_id(self):
 		self.amount_invoice = self.invoice_id.residual
+
+	@api.multi
+	def _cek_total(self):
+		inv_total = 0.0
+		for gi in self:
+			giro = gi.giro_id			
+			inv_total += gi.amount
+			total = inv_total
+			# import pdb; pdb.set_trace()
+			if total == giro.amount:
+				return True
+		return False
+	
+	_constraints = [(_cek_total, _(
+		'Total amount allocated untuk invoice harus sama dengan total Giro amount'), ['amount'])]
 
 
 class account_invoice(models.Model):

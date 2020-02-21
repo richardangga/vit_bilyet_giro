@@ -58,8 +58,8 @@
                 <field name="giro_invoice_ids">
                   <tree string="Invoices" editable="bottom">
                     <field name="invoice_id" domain="[('partner_id','=', parent.partner_id),('state','=','open'),('type','=',parent.invoice_type)]"/>
-                    <field name="amount_invoice"/>
-                    <field name="amount"/>
+                    <field name="amount_invoice" sum="Total Amount"/>
+                    <field name="amount" sum="Total Amount"/>
                   </tree>
                 </field>
               </page>
